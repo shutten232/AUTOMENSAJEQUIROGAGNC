@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>WhatsApp Talleres - Prueba Hidráulica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #031311;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .intro {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #0f766e 0%, #022c22 45%, #020617 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .intro-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .intro-card {
+      background: rgba(3, 23, 20, 0.9);
+      border-radius: 24px;
+      padding: 22px 26px;
+      border: 1px solid rgba(45, 212, 191, 0.4);
+      box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(34, 197, 94, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: intro-pop 0.7s ease-out;
+    }
+
+    @keyframes intro-pop {
+      0% {
+        transform: translateY(10px) scale(0.9);
+        opacity: 0;
+      }
+      60% {
+        transform: translateY(0) scale(1.02);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .intro-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 30% 20%, #22c55e, #0f766e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 0.06em;
+      color: #022c22;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intro-icon::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(34, 197, 94, 0.1),
+        rgba(16, 185, 129, 0.7),
+        rgba(34, 197, 94, 0.1)
+      );
+      mix-blend-mode: soft-light;
+      opacity: 0.7;
+    }
+
+    .intro-text h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .intro-text p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: #a5f3fc;
+    }
+
+    .intro-pill {
+      margin-top: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(22, 163, 74, 0.12);
+      color: #bbf7d0;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .intro-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+    }
+
+    .app {
+      background: #041814;
+      border-radius: 18px;
+      padding: 20px;
+      margin: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(34, 197, 94, 0.18);
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      padding-bottom: 10px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 20%, #22c55e, #0f766e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+      color: #022c22;
+    }
+
+    .logo span {
+      transform: translateY(1px);
+    }
+
+    .app-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .app-title h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .app-title small {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(22, 163, 74, 0.15);
+      color: #bbf7d0;
+      margin-top: 6px;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .field-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: #d1fae5;
+    }
+
+    select,
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(5, 30, 22, 0.9);
+      color: #f9fafb;
+      font-size: 13px;
+      outline: none;
+    }
+
+    select:focus,
+    input[type="date"]:focus,
+    textarea:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.6);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      flex: 1 1 auto;
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      box-shadow: 0 10px 20px rgba(34, 197, 94, 0.35);
+    }
+
+    .btn-secondary {
+      background: rgba(3, 22, 18, 0.95);
+      color: #e5e7eb;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .btn-icon {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .preview-card {
+      margin-top: 16px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), rgba(3, 22, 18, 0.95));
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .preview-card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #a5f3fc;
+      margin-bottom: 6px;
+    }
+
+    .preview-card strong {
+      color: #f9fafb;
+    }
+
+    .checklist-card {
+      margin-top: 16px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(3, 22, 18, 0.95);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      font-size: 12px;
+    }
+
+    .checklist-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #bbf7d0;
+      margin-bottom: 6px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .checklist-item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #22c55e;
+      cursor: pointer;
+    }
+
+    .checklist-item span {
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .checklist-item.sent span {
+      text-decoration: line-through;
+      color: #6ee7b7;
+    }
+
+    .checklist-actions {
+      margin-top: 6px;
+      text-align: right;
+      font-size: 11px;
+      color: #9ca3af;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .footer {
+      margin-top: 14px;
+      font-size: 10px;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        margin: 12px;
+        padding: 16px;
+      }
+
+      .intro-card {
+        margin: 0 18px;
+        padding: 18px 20px;
+      }
+    }
+
+    @keyframes intro-pop {}
+  </style>
+</head>
+<body>
+  <div class="intro" id="intro">
+    <div class="intro-card">
+      <div class="intro-icon">
+        <span>QG</span>
+      </div>
+      <div class="intro-text">
+        <h1>WhatsApp Talleres</h1>
+        <p>Consultas rápidas de prueba hidráulica</p>
+        <div class="intro-pill">
+          <span class="intro-dot"></span>
+          <span>CRPC · Quiroga GNC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="app-header">
+      <div class="logo">
+        <span>QG</span>
+      </div>
+      <div class="app-title">
+        <h1>WhatsApp Talleres</h1>
+        <small>Consulta rápida de prueba hidráulica</small>
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>Uso interno CRPC</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="tallerSelect">Taller</label>
+      <select id="tallerSelect"></select>
+      <div class="hint">Modo individual: elegís uno y enviás.</div>
+    </div>
+
+    <div class="field-group">
+      <label for="fechaRetiro">Fecha estimada de retiro (solo referencia)</label>
+      <input type="date" id="fechaRetiro" />
+      <div class="hint">No se incluye en el texto, solo en el resumen visual.</div>
+    </div>
+
+    <div class="field-group">
+      <label for="mensaje">Mensaje a enviar</label>
+      <textarea id="mensaje"></textarea>
+      <div class="hint">
+        Se arma solo, pero lo podés editar antes de mandar.
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-secondary" type="button" id="btnCopiar">
+        <span class="btn-icon">📋</span>
+        Copiar mensaje
+      </button>
+      <button class="btn btn-primary" type="button" id="btnWhatsApp">
+        <span class="btn-icon">🟢</span>
+        Enviar seleccionado
+      </button>
+      <button class="btn btn-primary" type="button" id="btnWhatsAppCadena">
+        <span class="btn-icon">🟢</span>
+        Enviar a todos (siguiente)
+      </button>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-title">Resumen</div>
+      <div id="previewTexto"></div>
+    </div>
+
+    <div class="checklist-card">
+      <div class="checklist-title">Checklist de envío (vuelta 1 y 2)</div>
+      <div id="checklist"></div>
+      <div class="checklist-actions" id="limpiarChecklist">Limpiar checklist</div>
+    </div>
+
+    <div class="footer">
+      “Enviar a todos (siguiente)” recorre los talleres en orden y marca el checklist.
+    </div>
+  </div>
+
+  <script>
+    const talleres = [
+      { id: "minuto", nombre: "Minuto GNC", telefono: "5493541331997" },
+      { id: "calera_torres", nombre: "Calera Torres GNC", telefono: "549351332145" },
+      { id: "calera_silvana", nombre: "Calera Silvana", telefono: "5493517917169" },
+      { id: "porto_alta_gracia", nombre: "Porto Alta Gracia", telefono: "5493513657628" },
+      { id: "franco_alta_gracia", nombre: "Franco Alta Gracia", telefono: "5493512296749" },
+
+      { id: "zico", nombre: "ZICO GNC", telefono: "5493513709071" },
+      { id: "colon", nombre: "Colón GNC", telefono: "5493513022367" },
+      { id: "tabach", nombre: "Tabach GNC", telefono: "5493517534709" },
+      { id: "servincor", nombre: "Servincor", telefono: "5493512535795" },
+      { id: "bruno_f", nombre: "Bruno F", telefono: "5493512317760" },
+      { id: "brochero", nombre: "Brochero GNC", telefono: "5493516758029" },
+      { id: "valparaiso", nombre: "Valparaíso GNC", telefono: "5493515069931" },
+
+      { id: "canovas", nombre: "Cánovas", telefono: "5493515644123" },
+      { id: "malvinas", nombre: "Malvinas GNC", telefono: "5493517468992" },
+      { id: "genesis", nombre: "Génesis GNC", telefono: "5493513683293" },
+      { id: "alem", nombre: "ALEM", telefono: "5493517358702" },
+      { id: "cars", nombre: "Cars", telefono: "5493512528085" },
+      { id: "fortezza", nombre: "Fortezza", telefono: "5493515928373" },
+      { id: "enerogas", nombre: "Enerogas", telefono: "5493516652145" },
+      { id: "jet", nombre: "JET", telefono: "5493512020674" }
+    ];
+
+    const selectTaller = document.getElementById("tallerSelect");
+    const fechaRetiro = document.getElementById("fechaRetiro");
+    const mensaje = document.getElementById("mensaje");
+    const btnWhatsApp = document.getElementById("btnWhatsApp");
+    const btnWhatsAppCadena = document.getElementById("btnWhatsAppCadena");
+    const btnCopiar = document.getElementById("btnCopiar");
+    const previewTexto = document.getElementById("previewTexto");
+    const intro = document.getElementById("intro");
+    const checklistContainer = document.getElementById("checklist");
+    const limpiarChecklistBtn = document.getElementById("limpiarChecklist");
+
+    let indiceCadena = 0;
+
+    function formatearFechaLarga(valor) {
+      if (!valor) return "";
+      const [y, m, d] = valor.split("-");
+      const fecha = new Date(Number(y), Number(m) - 1, Number(d));
+      const formatter = new Intl.DateTimeFormat("es-AR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+      });
+      return formatter.format(fecha);
+    }
+
+    function armarMensaje() {
+      const idx = selectTaller.value ? Number(selectTaller.value) : 0;
+      const taller = talleres[idx];
+      const fechaLarga = formatearFechaLarga(fechaRetiro.value);
+
+      let texto = "Buenos días, ¿tienen prueba hidráulica?\n\n";
+      texto += "Si tienen, pasame por favor la cantidad aproximada de cilindros.\n\n";
+      texto += "Gracias.";
+
+      mensaje.value = texto;
+
+      let resumen = `<strong>Taller seleccionado:</strong> ${taller.nombre}<br>`;
+      if (fechaLarga) {
+        resumen += `<strong>Fecha referencia:</strong> ${fechaLarga}<br>`;
+      }
+      resumen += `<strong>Texto:</strong><br>${texto.replace(/\n/g, "<br>")}`;
+      previewTexto.innerHTML = resumen;
+
+      indiceCadena = 0;
+    }
+
+    function marcarChecklist(index, marcado) {
+      const row = document.querySelector(`.checklist-item[data-index="${index}"]`);
+      if (!row) return;
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      checkbox.checked = marcado;
+      if (marcado) row.classList.add("sent");
+      else row.classList.remove("sent");
+    }
+
+    function abrirWhatsAppIndividual() {
+      const idx = Number(selectTaller.value);
+      const taller = talleres[idx];
+      const texto = mensaje.value.trim();
+
+      if (!taller.telefono || !texto) {
+        alert("Falta teléfono del taller o mensaje vacío.");
+        return;
+      }
+
+      const url = `https://wa.me/${taller.telefono}?text=${encodeURIComponent(texto)}`;
+      window.open(url, "_blank");
+
+      marcarChecklist(idx, true);
+    }
+
+    function abrirWhatsAppCadena() {
+      const texto = mensaje.value.trim();
+      if (!texto) {
+        alert("Mensaje vacío.");
+        return;
+      }
+
+      if (indiceCadena >= talleres.length) {
+        alert("Ya recorriste todos los talleres. Se reinicia la lista.");
+        indiceCadena = 0;
+        return;
+      }
+
+      const t = talleres[indiceCadena];
+
+      if (!t.telefono) {
+        indiceCadena++;
+        if (indiceCadena < talleres.length) abrirWhatsAppCadena();
+        return;
+      }
+
+      const url = `https://wa.me/${t.telefono}?text=${encodeURIComponent(texto)}`;
+      window.open(url, "_blank");
+
+      marcarChecklist(indiceCadena, true);
+      indiceCadena++;
+    }
+
+    function copiarMensaje() {
+      const texto = mensaje.value.trim();
+      if (!texto) {
+        alert("No hay mensaje para copiar.");
+        return;
+      }
+      navigator.clipboard.writeText(texto).catch(() => {
+        alert("No se pudo copiar el texto.");
+      });
+    }
+
+    function construirChecklist() {
+      checklistContainer.innerHTML = "";
+      talleres.forEach((t, index) => {
+        const row = document.createElement("div");
+        row.className = "checklist-item";
+        row.dataset.index = String(index);
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.dataset.index = String(index);
+
+        const label = document.createElement("span");
+        label.textContent = t.nombre;
+
+        input.addEventListener("change", () => {
+          marcarChecklist(index, input.checked);
+        });
+
+        row.appendChild(input);
+        row.appendChild(label);
+        checklistContainer.appendChild(row);
+      });
+    }
+
+    function limpiarChecklist() {
+      const items = document.querySelectorAll(".checklist-item");
+      items.forEach((row, index) => {
+        marcarChecklist(index, false);
+      });
+      indiceCadena = 0;
+    }
+
+    function init() {
+      talleres.forEach((t, index) => {
+        const opt = document.createElement("option");
+        opt.value = String(index);
+        opt.textContent = t.nombre;
+        selectTaller.appendChild(opt);
+      });
+
+      construirChecklist();
+
+      const hoy = new Date();
+      const yyyy = hoy.getFullYear();
+      const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+      const dd = String(hoy.getDate()).padStart(2, "0");
+      fechaRetiro.value = `${yyyy}-${mm}-${dd}`;
+
+      armarMensaje();
+
+      setTimeout(() => {
+        intro.classList.add("intro-hidden");
+      }, 2000);
+    }
+
+    selectTaller.addEventListener("change", armarMensaje);
+    fechaRetiro.addEventListener("change", armarMensaje);
+    btnWhatsApp.addEventListener("click", abrirWhatsAppIndividual);
+    btnWhatsAppCadena.addEventListener("click", abrirWhatsAppCadena);
+    btnCopiar.addEventListener("click", copiarMensaje);
+    limpiarChecklistBtn.addEventListener("click", limpiarChecklist);
+
+    window.addEventListener("load", init);
+  </script>
+</body>
+</html>
