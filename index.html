@@ -434,7 +434,7 @@
       <label for="mensaje">Mensaje a enviar</label>
       <textarea id="mensaje"></textarea>
       <div class="hint">
-        Se arma solo, pero lo podés editar antes de mandar.
+        Se arma solo al inicio, pero lo podés editar y queda igual aunque cambies de taller.
       </div>
     </div>
 
@@ -472,12 +472,12 @@
   <script>
     const talleres = [
       { id: "minuto", nombre: "Minuto GNC", telefono: "5493541331997" },
-      { id: "calera_torres", nombre: "Calera Torres GNC", telefono: "549351332145" },
+      { id: "calera_torres", nombre: "Calera Torres GNC", telefono: "5493513832145" },
       { id: "calera_silvana", nombre: "Calera Silvana", telefono: "5493517917169" },
       { id: "porto_alta_gracia", nombre: "Porto Alta Gracia", telefono: "5493513657628" },
       { id: "franco_alta_gracia", nombre: "Franco Alta Gracia", telefono: "5493512296749" },
 
-      { id: "zico", nombre: "ZICO GNC", telefono: "5493513709071" },
+      { id: "zico", nombre: "ZICO GNC", telefono: "5493513706071" },
       { id: "colon", nombre: "Colón GNC", telefono: "5493513022367" },
       { id: "tabach", nombre: "Tabach GNC", telefono: "5493517534709" },
       { id: "servincor", nombre: "Servincor", telefono: "5493512535795" },
@@ -506,7 +506,13 @@
     const checklistContainer = document.getElementById("checklist");
     const limpiarChecklistBtn = document.getElementById("limpiarChecklist");
 
+    const mensajeBase =
+      "Buenos días, ¿tienen prueba hidráulica?\n\n" +
+      "Si tienen, pasame por favor la cantidad aproximada de cilindros.\n\n" +
+      "Gracias.";
+
     let indiceCadena = 0;
+    let mensajeEditado = false; // para saber si el usuario ya tocó el texto
 
     function formatearFechaLarga(valor) {
       if (!valor) return "";
@@ -520,25 +526,19 @@
       return formatter.format(fecha);
     }
 
-    function armarMensaje() {
+    function actualizarPreview() {
       const idx = selectTaller.value ? Number(selectTaller.value) : 0;
       const taller = talleres[idx];
       const fechaLarga = formatearFechaLarga(fechaRetiro.value);
 
-      let texto = "Buenos días, ¿tienen prueba hidráulica?\n\n";
-      texto += "Si tienen, pasame por favor la cantidad aproximada de cilindros.\n\n";
-      texto += "Gracias.";
-
-      mensaje.value = texto;
+      const textoActual = mensaje.value.trim() || mensajeBase;
 
       let resumen = `<strong>Taller seleccionado:</strong> ${taller.nombre}<br>`;
       if (fechaLarga) {
         resumen += `<strong>Fecha referencia:</strong> ${fechaLarga}<br>`;
       }
-      resumen += `<strong>Texto:</strong><br>${texto.replace(/\n/g, "<br>")}`;
+      resumen += `<strong>Texto:</strong><br>${textoActual.replace(/\n/g, "<br>")}`;
       previewTexto.innerHTML = resumen;
-
-      indiceCadena = 0;
     }
 
     function marcarChecklist(index, marcado) {
@@ -550,10 +550,20 @@
       else row.classList.remove("sent");
     }
 
+    function buscarSiguienteIndiceCadena() {
+      const items = document.querySelectorAll(".checklist-item");
+      for (let i = 0; i < talleres.length; i++) {
+        const row = items[i];
+        const chk = row.querySelector('input[type="checkbox"]');
+        if (!chk.checked) return i;
+      }
+      return -1;
+    }
+
     function abrirWhatsAppIndividual() {
       const idx = Number(selectTaller.value);
       const taller = talleres[idx];
-      const texto = mensaje.value.trim();
+      const texto = (mensaje.value.trim() || mensajeBase).trim();
 
       if (!taller.telefono || !texto) {
         alert("Falta teléfono del taller o mensaje vacío.");
@@ -567,23 +577,26 @@
     }
 
     function abrirWhatsAppCadena() {
-      const texto = mensaje.value.trim();
+      const texto = (mensaje.value.trim() || mensajeBase).trim();
       if (!texto) {
         alert("Mensaje vacío.");
         return;
       }
 
-      if (indiceCadena >= talleres.length) {
+      let siguiente = buscarSiguienteIndiceCadena();
+      if (siguiente === -1) {
         alert("Ya recorriste todos los talleres. Se reinicia la lista.");
         indiceCadena = 0;
         return;
       }
 
+      indiceCadena = siguiente;
       const t = talleres[indiceCadena];
 
       if (!t.telefono) {
+        marcarChecklist(indiceCadena, true);
         indiceCadena++;
-        if (indiceCadena < talleres.length) abrirWhatsAppCadena();
+        abrirWhatsAppCadena();
         return;
       }
 
@@ -595,7 +608,7 @@
     }
 
     function copiarMensaje() {
-      const texto = mensaje.value.trim();
+      const texto = mensaje.value.trim() || mensajeBase;
       if (!texto) {
         alert("No hay mensaje para copiar.");
         return;
@@ -653,15 +666,21 @@
       const dd = String(hoy.getDate()).padStart(2, "0");
       fechaRetiro.value = `${yyyy}-${mm}-${dd}`;
 
-      armarMensaje();
+      // mensaje base solo al inicio
+      mensaje.value = mensajeBase;
+      actualizarPreview();
 
       setTimeout(() => {
         intro.classList.add("intro-hidden");
       }, 2000);
     }
 
-    selectTaller.addEventListener("change", armarMensaje);
-    fechaRetiro.addEventListener("change", armarMensaje);
+    selectTaller.addEventListener("change", actualizarPreview);
+    fechaRetiro.addEventListener("change", actualizarPreview);
+    mensaje.addEventListener("input", () => {
+      mensajeEditado = true;
+      actualizarPreview();
+    });
     btnWhatsApp.addEventListener("click", abrirWhatsAppIndividual);
     btnWhatsAppCadena.addEventListener("click", abrirWhatsAppCadena);
     btnCopiar.addEventListener("click", copiarMensaje);
